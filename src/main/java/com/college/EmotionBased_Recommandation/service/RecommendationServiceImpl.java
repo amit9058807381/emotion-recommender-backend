@@ -32,7 +32,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         List<ContentItem> matchingContent = contentItemService.fetchAndCacheContentForEmotion(emotion, type);
 
         Map<Long, Integer> engagementMap = historyRepository
-                .findByUser_IdAndEmotionLog_Emotion(userId, emotion)
+                .findByUser_IdAndEmotion(userId, emotion)
                 .stream()
                 .filter(RecommendationHistory::getWasSelected)
                 .collect(Collectors.toMap(
@@ -49,15 +49,17 @@ public class RecommendationServiceImpl implements RecommendationService {
                 })
                 .collect(Collectors.toList());
     }
+
     @Override
     public void recordSelection(Long userId, Long contentItemId, String emotion) {
         Optional<RecommendationHistory> existing = historyRepository
-                .findByUser_IdAndContentItem_IdAndEmotionLog_Emotion(userId, contentItemId, emotion);
+                .findByUser_IdAndContentItem_IdAndEmotion(userId, contentItemId, emotion);
 
         if (existing.isPresent()) {
             RecommendationHistory history = existing.get();
             history.setSelectionCount(history.getSelectionCount() + 1);
             history.setWasSelected(true);
+            history.setRecommendedAt(LocalDateTime.now());
             historyRepository.save(history);
         } else {
             User user = userRepository.findById(userId)
@@ -68,6 +70,7 @@ public class RecommendationServiceImpl implements RecommendationService {
             RecommendationHistory history = new RecommendationHistory();
             history.setUser(user);
             history.setContentItem(contentItem);
+            history.setEmotion(emotion);
             history.setWasSelected(true);
             history.setSelectionCount(1);
             history.setRecommendedAt(LocalDateTime.now());

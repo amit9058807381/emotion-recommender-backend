@@ -37,4 +37,7 @@ public class RecommendationHistory {
 
     @Column(name = "selection_count")
     private Integer selectionCount = 0; // how many times user engaged — used for top-ranking
+
+    @Column(name = "emotion")
+    private String emotion;
 }

@@ -7,9 +7,11 @@ import java.util.Optional;
 
 public interface RecommendationHistoryRepository extends JpaRepository<RecommendationHistory, Long> {
 
-    List<RecommendationHistory> findByUser_IdAndEmotionLog_Emotion(Long userId, String emotion);
+    List<RecommendationHistory> findByUser_IdAndEmotion(Long userId, String emotion);
 
-    Optional<RecommendationHistory> findByUser_IdAndContentItem_IdAndEmotionLog_Emotion(
+    Optional<RecommendationHistory> findByUser_IdAndContentItem_IdAndEmotion(
             Long userId, Long contentItemId, String emotion
     );
+
+    List<RecommendationHistory> findByUser_IdAndWasSelectedTrueOrderByRecommendedAtDesc(Long userId);
 }
