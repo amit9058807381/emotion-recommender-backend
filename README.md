@@ -75,13 +75,13 @@ Server runs on `http://localhost:8081` by default.
 | POST | `/api/recommendations/select` | Record that a user engaged with a recommendation |
 
 ## Project Structure
-src/main/java/.../
-├── controller/ REST controllers
-├── service/ Business logic
-├── repository/ Spring Data JPA repositories
-├── entity/ JPA entities
-├── security/ JWT, OAuth2, Spring Security config
-└── helper/ DTOs / request-response objects
+
+- `controller/` — REST controllers
+- `service/` — Business logic
+- `repository/` — Spring Data JPA repositories
+- `entity/` — JPA entities
+- `security/` — JWT, OAuth2, Spring Security config
+- `helper/` — DTOs / request-response objects
 
 ## Author
 
