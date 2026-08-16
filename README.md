@@ -1,10 +1,10 @@
 # Emotion-Based Recommendation System — Backend
 
-An AI-powered recommendation system that detects a user's facial emotion and suggests personalized movies, music, and videos based on their mood.
+An AI-powered recommendation system that detects a user's facial emotion and suggests personalized movies, music, videos, quotes, short stories, and books based on their mood.
 
 ## Overview
 
-This backend service captures a user's emotion from a webcam image, uses an AI emotion detection API to identify the mood, and returns curated recommendations (movies, music, videos) sourced from YouTube. It learns from user engagement over time — content the user previously selected for a given emotion is ranked higher on repeat visits.
+This backend service captures a user's emotion from a webcam image, uses an AI emotion detection API to identify the mood, and returns curated recommendations. Movies, videos, and music are sourced live from YouTube; quotes, short stories, and book suggestions are generated on the fly by Google's Gemini AI. The system learns from user engagement over time — content the user previously selected for a given emotion is ranked higher on repeat visits, and a full watch/selection history is available grouped by emotion.
 
 ## Tech Stack
 
@@ -13,24 +13,27 @@ This backend service captures a user's emotion from a webcam image, uses an AI e
 - **Spring Security** + **JWT** (authentication & authorization)
 - **OAuth2** (Google Sign-In)
 - **Face++ API** (facial emotion detection)
-- **YouTube Data API v3** (content recommendations)
+- **YouTube Data API v3** (movie/video/music recommendations)
+- **Google Gemini API** (AI-generated quotes, short stories, and book suggestions)
 - **WebClient / WebFlux** (external API calls)
 
 ## Features
 
 - Facial emotion detection from webcam images (Happy, Sad, Angry, Fear, Surprise, Neutral)
-- Personalized recommendations (movies, videos, music) based on detected emotion
+- Personalized recommendations across 6 content types: movie, video, music, quote, story, book
+- Movie/video/music sourced from YouTube; quote/story/book generated live by Gemini AI
 - Engagement-based ranking — previously selected content ranks higher on repeat emotions
+- Full selection history, grouped by emotion (what the user watched/read for each mood)
 - User authentication: email/password registration & login, and Google OAuth login
 - JWT-secured REST APIs
-- Emotion history and recommendation history tracking
+- Emotion history tracking
 
 ## Prerequisites
 
 - Java 17+
 - Maven
 - MySQL 8+
-- API keys: [Face++](https://console.faceplusplus.com/), [YouTube Data API](https://console.cloud.google.com/), Google OAuth2 credentials
+- API keys: [Face++](https://console.faceplusplus.com/), [YouTube Data API](https://console.cloud.google.com/), [Google Gemini](https://aistudio.google.com/), Google OAuth2 credentials
 
 ## Environment Variables
 
@@ -47,6 +50,8 @@ This project reads secrets from environment variables (never hardcoded). Set the
 | `EMOTION_API_KEY` | Face++ API key |
 | `YOUTUBE_URL` | YouTube Data API search endpoint |
 | `YOUTUBE_API` | YouTube Data API key |
+| `GEMINI_URL` | Gemini generateContent endpoint (e.g. models/gemini-flash-lite-latest:generateContent) |
+| `GEMINI_API_KEY` | Google Gemini API key |
 | `CLIENT_ID` | Google OAuth2 client ID |
 | `CLIENT_SECRET` | Google OAuth2 client secret |
 | `JWT_SECRET` | Secret key for signing JWT tokens |
@@ -70,14 +75,15 @@ Server runs on `http://localhost:8081` by default.
 | POST | `/api/auth/login` | Login and receive a JWT |
 | GET | `/oauth2/authorization/google` | Google OAuth login |
 | POST | `/api/emotion/detect` | Detect emotion from a base64 image |
-| GET | `/api/emotion/history/{userId}` | Get a user's emotion history |
-| GET | `/api/recommendations` | Get ranked recommendations for an emotion + type |
+| GET | `/api/emotion/history/{userId}` | Get a user's emotion detection history |
+| GET | `/api/recommendations` | Get ranked recommendations for an emotion + type (movie/video/music/quote/story/book) |
 | POST | `/api/recommendations/select` | Record that a user engaged with a recommendation |
+| GET | `/api/recommendations/history/{userId}` | Get a user's full selection history, grouped by emotion |
 
 ## Project Structure
 
 - `controller/` — REST controllers
-- `service/` — Business logic
+- `service/` — Business logic, including YouTube, Face++, and Gemini integrations
 - `repository/` — Spring Data JPA repositories
 - `entity/` — JPA entities
 - `security/` — JWT, OAuth2, Spring Security config
