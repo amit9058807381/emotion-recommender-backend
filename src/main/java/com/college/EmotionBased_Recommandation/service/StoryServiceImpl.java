@@ -1,25 +1,17 @@
 package com.college.EmotionBased_Recommandation.service;
 
 import com.college.EmotionBased_Recommandation.entity.ContentItem;
-import com.college.EmotionBased_Recommandation.helper.GeminiResponse;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import java.util.*;
 
 @Service
 public class StoryServiceImpl implements StoryService {
 
-    private final WebClient webClient;
+    private final ChatClient chatClient;
 
-    @Value("${gemini.api.url}")
-    private String apiUrl;
-
-    @Value("${gemini.api.key}")
-    private String apiKey;
-
-    public StoryServiceImpl(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.build();
+    public StoryServiceImpl(ChatClient.Builder chatClientBuilder) {
+        this.chatClient = chatClientBuilder.build();
     }
 
     @Override
@@ -30,27 +22,17 @@ public class StoryServiceImpl implements StoryService {
                 + "For each story, start with a short title on the first line (no 'Title:' prefix, just the title text), "
                 + "then a blank line, then the story text. Do not add any numbering or extra commentary.";
 
-        Map<String, Object> requestBody = Map.of(
-                "contents", List.of(
-                        Map.of("parts", List.of(Map.of("text", prompt)))
-                )
-        );
-
-        GeminiResponse response = webClient.post()
-                .uri(apiUrl + "?key=" + apiKey)
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(GeminiResponse.class)
-                .block();
+        String rawText = chatClient.prompt()
+                .user(prompt)
+                .call()
+                .content();
 
         List<ContentItem> results = new ArrayList<>();
 
-        if (response == null || response.getCandidates() == null || response.getCandidates().isEmpty()) {
+        if (rawText == null || rawText.isBlank()) {
             return results;
         }
 
-        String rawText = response.getCandidates().get(0).getContent().getParts().get(0).getText();
         String[] stories = rawText.split("###");
 
         for (String storyBlock : stories) {
